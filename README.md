@@ -85,9 +85,9 @@ Below is an example output:
 
 ---
 
-## Integration Methods
+# Integration Methods
 
-### A. Flow Integration
+# A. Flow Integration
 
 Every saved and activated prompt template that you create is automatically exposed as an invocable action that you can invoke from Flow using the regular Actions element. You can filter them out by selecting the Prompt Template category when creating the element.
 
