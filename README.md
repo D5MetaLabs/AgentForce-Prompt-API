@@ -10,7 +10,7 @@ This guide explores how to integrate Prompt Templates into Salesforce workflows,
 Prompt Builder, part of **Einstein 1 Studio**, enables integration of generative AI into everyday workflows by allowing you to build and manage prompt templates. These templates can dynamically merge Salesforce CRM data—record fields, flows, Apex inputs, related lists—into context-aware prompts for Large Language Models (LLMs).
 
 ---
-[[![Prompt Lifecycle Diagram]([image-url.png](https://github.com/D5MetaLabs/AgentForce-Prompt-API/blob/46f9631cd7f2d29e36598cd49db2fcae527f43b5/Prompt%20life%20cycle.png))](https://raw.githubusercontent.com/D5MetaLabs/AgentForce-Prompt-API/main/Prompt%20life%20cycle.png)](https://raw.githubusercontent.com/D5MetaLabs/AgentForce-Prompt-API/main/Prompt%20life%20cycle.png)
+[!image alt](https://github.com/D5MetaLabs/AgentForce-Prompt-API/blob/d5f56c40926c7cd860a1b335ff3e5405ead1945e/Prompt%20life%20cycle.png)
 
 ## Entry Point Matrix
 
