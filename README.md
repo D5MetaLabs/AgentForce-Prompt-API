@@ -14,7 +14,7 @@ Prompt Builder, part of **Einstein 1 Studio**, enables integration of generative
 
 ## Entry points for executing prompt templates
 
-![Prompt Life Cycle](https://github.com/D5MetaLabs/AgentForce-Prompt-API/blob/d5f56c40926c7cd860a1b335ff3e5405ead1945e/Prompt%20life%20cycle.png)
+![Prompt life cycle](https://github.com/user-attachments/assets/d0a733a1-21e5-4ffa-854e-9a72f1e1b7b8)
 
 
 ## Entry Point Matrix
@@ -236,16 +236,17 @@ POST /services/data/v62.0/einstein/prompt-templates/{TEMPLATE_API_NAME}/generati
 ## Sample cURL Command
 
 ```bash
-curl --location 'https://yourinstance.salesforce.com/services/data/v62.0/einstein/prompt-templates/Summarize_Classify_Cases1/generations' \
+curl --location --request POST 'https:mydomain.develop.my.salesforce.com/services/data/v62.0/einstein/prompt-templates/Template_Dev_Name/generations' \
 --header 'Authorization: Bearer {access_token}' \
 --header 'Content-Type: application/json' \
+--header 'Accept: application/json' \
 --data-raw '{
   "isPreview": false,
   "inputParams": {
     "valueMap": {
-      "Input:mycase": {
+      "Input:mycase(Prompt inputs)": {
         "value": {
-          "id": "500gL000005ZwO1QAK"
+          "id": " "
         }
       }
     }
@@ -253,10 +254,17 @@ curl --location 'https://yourinstance.salesforce.com/services/data/v62.0/einstei
   "additionalConfig": {
     "numGenerations": 1,
     "temperature": 0,
+    "frequencyPenalty": 0.0,
+    "presencePenalty": 0.0,
+    "additionalParameters": {},
     "applicationName": "PromptBuilderPreview"
   }
 }'
 ```
+## Demo : 
+
+![ScreenRecording2025-05-19at10 22 50PM-ezgif com-speed](https://github.com/user-attachments/assets/e82cfb9b-1c4f-4783-92d2-4ae4d3459637)
+
 
 ### Use Cases
 
