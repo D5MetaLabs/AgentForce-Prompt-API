@@ -1,4 +1,9 @@
-# Invoke Prompt Templates from Flow, Apex, or REST API
+# Leveraging Prompt Templates Across Salesforce Ecosystem
+
+## Overview
+Salesforce’s **Prompt Builder** empowers organizations to integrate generative AI seamlessly into business processes by dynamically generating context-aware responses. Whether automating case summaries, drafting personalized emails, or enriching field data, Prompt Templates can be invoked through multiple entry points—**Flow, Apex, or REST API**—enabling AI-driven automation across declarative and programmatic solutions.
+
+This guide explores how to integrate Prompt Templates into Salesforce workflows, backend logic, and external systems, with a focus on a **Case Classification & Summarization** use case.
 
 ## What is Prompt Builder?
 
