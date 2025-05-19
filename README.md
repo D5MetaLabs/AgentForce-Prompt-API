@@ -246,7 +246,7 @@ curl --location --request POST 'https:mydomain.develop.my.salesforce.com/service
     "valueMap": {
       "Input:mycase(Prompt inputs)": {
         "value": {
-          "id": " "
+          "id": "Give Id "
         }
       }
     }
@@ -274,9 +274,15 @@ curl --location --request POST 'https:mydomain.develop.my.salesforce.com/service
 
 ---
 
-> ✅ **Tip:** Always test your Apex or REST request in Postman or Developer Console before moving to production.
+## Summary
 
-> ✅ **Tip:** Use the same prompt API name and input mappings as configured in your Prompt Builder template.
+By combining Prompt Builder with Flow, Apex, and REST API, Salesforce enables robust AI integration across the platform—from declarative automation to backend logic and external applications.
+
+> ✅ **Tips**
+>
+> * Always test templates in Postman or Developer Console before rollout
+> * Maintain consistent input mappings between Prompt Builder and calling method
+> * Use appropriate entry points based on use case complexity and source system
 
 ---
 
@@ -285,4 +291,3 @@ curl --location --request POST 'https:mydomain.develop.my.salesforce.com/service
 * [Apex ConnectApi Overview](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/connectAPI_overview.htm)
 * [Prompt Template Connect REST Resource](https://developer.salesforce.com/docs/atlas.en-us.chatterapi.meta/chatterapi/connect_resources_prompt_template.htm)
 * [Prompt Builder Documentation](https://help.salesforce.com/s/articleView?id=ai.prompt_builder_about.htm&type=5)
-
