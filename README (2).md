@@ -1,90 +1,121 @@
-# Salesforce Case Classification & Summarization System
+# Invoke Prompt Templates from Flow, Apex, or REST API
 
-## Overview
+## What is Prompt Builder?
 
-This system automatically classifies and summarizes hardware service cases (mechanical, electrical, electronic, structural) using AI-powered prompt templates invoked through multiple integration methods.
-
-Prompt templates are used to integrate generative AI capabilities into your applications and workflows. They are created in **Prompt Builder**, part of the **Einstein 1 Studio**. Upon invocation, prompt templates resolve all data references (merge fields, related lists, flow inputs, Apex inputs), then securely pass through the **Einstein Trust Layer**, and finally generate responses from the **large language model (LLM)**.
-
-### 🤖 What is Prompt Builder?
-
-Prompt Builder allows you to simplify your users’ daily tasks by integrating generative-AI moments into their workflow. With Prompt Builder, you can create, test, revise, customize, and manage prompt templates that incorporate your CRM data—merging record fields, flows, related lists, and Apex inputs—to deliver context-aware AI interactions.
-
-Prompt templates can be triggered via:
-
-* **Flow**
-* **Apex**
-* **REST API**
+Prompt Builder, part of **Einstein 1 Studio**, enables integration of generative AI into everyday workflows by allowing you to build and manage prompt templates. These templates can dynamically merge Salesforce CRM data—record fields, flows, Apex inputs, related lists—into context-aware prompts for Large Language Models (LLMs).
 
 ---
 
-## System Components
+## Entry Point Matrix
 
-### 1. Prompt Template Workspace
+| Template Type        | Description                                                | Inputs                                      | Available Entry Points                               |
+| -------------------- | ---------------------------------------------------------- | ------------------------------------------- | ---------------------------------------------------- |
+| **Sales Email**      | Draft personalized emails through Email Composer           | Contact or Lead + optional secondary object | Email Composer, Flow, Apex, REST API, Copilot action |
+| **Field Generation** | Generate text for storage in custom fields on record pages | Single object of choice                     | Record Page, Flow, Apex, REST API, Copilot action    |
+| **Flex**             | Generate text for flexible use cases                       | Up to five objects of choice                | Flow, Apex, REST API, Copilot action                 |
+| **Record Summary**   | Generate record summaries for Einstein Copilot             | Single object of choice                     | Copilot action                                       |
 
-* **Template Name:** `Summarize_Classify_Cases1`
-* **Purpose:** Categorize cases by Type and Reason, and generate concise summaries.
+---
 
-#### 🔹 Input Structure
+## Entry Points Reference
 
-```json
-{
-  "Priority": "{!$Input:myCase.Priority}",
-  "Subject": "{!$Input:myCase.Subject}",
-  "Description": "{!$Input:myCase.Description}",
-  "CaseComments": "{!$RelatedList:mycase.CaseComments.Records}",
-  "Snapshot": "{!$RecordSnapshot:mycase.Snapshot}"
-}
+| Out-of-the-Box Entry Points​           | Custom Entry Points​                      |
+| --------------------------- | ------------------------------------------ |
+| Email Composer (OOTB)       | Flow (Declarative)                |
+| Dynamic Record Pages (OOTB) | Apex (Backend logic)   |
+| Copilot Actions (OOTB)      | REST API (External Applications) |
+
+---
+
+## Execution Flow
+
+1. **Invocation**: Triggered via Flow, Apex, REST API, or Copilot
+2. **Transformation**: Resolves data (fields, merge references, etc.) via Trust Layer
+3. **LLM Processing**: Prompt sent to LLM for generation
+4. **Response Handling**: Output delivered to calling system for further use
+
+---
+
+## Best Practices
+
+* Use REST API for integrations with external systems
+* Use Apex for complex logic
+* Use Flow for declarative automation
+* Use Copilot for user-facing AI actions
+
+---
+
+# Use Case: Case Classification & Summarization System
+
+## System Overview
+
+This system classifies and summarizes service cases (mechanical, electrical, electronic, structural) using the AI capabilities of Prompt Builder integrated through Flow, Apex, and REST API.
+
+### Prompt Template Details
+
+* **Name:** Summarize\_Classify\_Cases1
+* **Function:** Classify `Type`, `Reason` and generate `Quick_Summary__c`
+
+#### Sample Prompt Template
+
 ```
+You are a API service for a company that services mechanical, electrical, electronic, and other forms of hardware. Your job is to categorize cases by Type and Case Reason and summarize them using the Case's Case Comments, Subject, and Description.
+Case Type and Case Reason have predefined values. They are listed below:
+Case Type: Electrical, Mechanical, Electronic, Structural, Other, null
+Case Reason: Installation, Equipment Complexity, Performance, Breakdown, Equipment Design, Feedback, Other, null
+Categorize the case below.
+Priority: {!$Input:myCase.Priority}
+Subject: {!$Input:myCase.Subject}
+Description: {!$Input:myCase.Description}
+Case Comments: {!$RelatedList:mycase.CaseComments.Records}
+Now categorize and summarize the case. Output your categorization and summary as valid JSON with the keys "caseType", "reason", and "summary". Always include each key.Ensure that you return valid JSON.
 
-#### 🔹 Output Format
-
-```json
+Below is an example output:
 {
-  "caseType": "Mechanical|Electrical|Electronic|Structural|Other",
-  "reason": "Installation|Equipment Complexity|Performance|Breakdown|Equipment Design|Feedback|Other",
-  "summary": "Generated case summary text"
+"caseType": "Mechanical",
+"reason": "Installation",
+"summary": "The case titled 'Mechanical issue' has a priority level of High and is categorized under Mechanical. The case comments indicate that engineering was contacted to obtain a PDF of the installation instructions. The diagram was then emailed to the customer, and a response is currently awaited. Additional information shared notes that the device was manufactured in 2020."
 }
 ```
 
 ---
 
-### 2. Integration Methods
+## Integration Methods
 
-#### A. Flow Integration
+### A. Flow Integration
 
-* **Flow Type:** Record-Triggered Flow
+Every saved and activated prompt template that you create is automatically exposed as an invocable action that you can invoke from Flow using the regular Actions element. You can filter them out by selecting the Prompt Template category when creating the element.
 
-* **Trigger:** On Case create/update
-
+All templates with a specific input should have that input passed in as a related entity when invoked from a flow.
+In this example, since this is a field generation prompt template that’s associated with the Contact object, you need to pass a contact as a related entity.
+* **Type:** Record-Triggered Flow
+* **Trigger:** On Case Create/Update
 * **Logic:**
 
   * Checks if `Reason`, `Type`, or `Quick_Summary__c` is blank
-  * Invokes prompt template with case context
-  * Parses response via Apex `CaseSummarizationTemplateParser`
-  * Updates fields on the Case record
+  * Invokes the prompt template using Flow action
+  * Parses and updates Case using Apex class `CaseSummarizationTemplateParser`
 
-* **Fields Used:** `Subject`, `Description`, `Reason`, `Type`, `Quick_Summary__c`
 
----
+# B. APEX INTEGRATION
 
-#### B. Apex Integration
+## Purpose
 
-First, like in Flow, each prompt template will expect different inputs to be passed in, so you need to create the inputs in Apex and pass them to the template. The sample flex prompt template is associated with a `Property__c` custom object, so we need to pass a property record when we invoke it from Apex.
+Use Apex to invoke Prompt Builder templates programmatically with full control over logic, error handling, and field updates.
 
-In Apex, you use classes and methods from `ConnectApi` to invoke prompt templates. You can control several parameters of the invocation using the `EinsteinPromptTemplateGenerationsInput` object:
+## Key Components
 
-* `isPreview`: If `true`, only resolves the prompt and returns it without sending to the LLM.
-* `numGenerations`: Number of responses to generate (default is 1).
-* `temperature`: Controls model creativity (0 = deterministic, 1 = more diverse).
-* `frequencyPenalty`: Reduces repetitiveness of generated tokens.
+* `ConnectApi.EinsteinLLM.generateMessagesForPromptTemplate(...)`: Main method to call the template
+* `ConnectApi.EinsteinPromptTemplateGenerationsInput`: Holds the input record(s), configuration, and application info
+* `ConnectApi.WrappedValue`: Wraps Salesforce object references as input
 
-Here’s a working example:
+## Apex Sample Code Explained
 
-```java
+```apex
 public with sharing class DynamicPromptTemplateHandler {
     public static String generatePromptFromTemplate(Id caseId) {
         try {
+            // Step 1: Prepare the Case input
             Map<String, Object> caseMap = new Map<String, Object>{'id' => caseId};
             ConnectApi.WrappedValue caseValue = new ConnectApi.WrappedValue();
             caseValue.value = caseMap;
@@ -93,24 +124,26 @@ public with sharing class DynamicPromptTemplateHandler {
                 'Input:mycase' => caseValue
             };
 
+            // Step 2: Set additional LLM configuration
             ConnectApi.EinsteinLlmAdditionalConfigInput config = new ConnectApi.EinsteinLlmAdditionalConfigInput();
-            config.applicationName = 'PromptBuilderPreview';
-            config.temperature = 0.2;
-            config.frequencyPenalty = 0.0;
-            config.numGenerations = 1;
+            config.applicationName = 'PromptBuilderPreview'; // Logical grouping name
+            config.temperature = 0.2; // Controls randomness in response
+            config.numGenerations = 1; // Number of response outputs
 
+            // Step 3: Create request payload
             ConnectApi.EinsteinPromptTemplateGenerationsInput request = new ConnectApi.EinsteinPromptTemplateGenerationsInput();
             request.additionalConfig = config;
-            request.isPreview = false;
             request.inputParams = inputParams;
 
-            ConnectApi.EinsteinPromptTemplateGenerationsRepresentation response = 
+            // Step 4: Call the Prompt Template
+            ConnectApi.EinsteinPromptTemplateGenerationsRepresentation response =
                 ConnectApi.EinsteinLLM.generateMessagesForPromptTemplate(
-                    'Summarize_Classify_Cases1', 
+                    'Summarize_Classify_Cases1', // Template API name
                     request
                 );
 
-            if(response != null && !response.generations.isEmpty()) {
+            // Step 5: Parse and update the result
+            if (response != null && !response.generations.isEmpty()) {
                 String summary = response.generations[0].text;
                 Case c = [SELECT Id, Quick_Summary__c FROM Case WHERE Id = :caseId];
                 c.Quick_Summary__c = summary;
@@ -118,7 +151,7 @@ public with sharing class DynamicPromptTemplateHandler {
                 return summary;
             }
             return null;
-        } catch(Exception e) {
+        } catch (Exception e) {
             System.debug('Error: ' + e.getMessage());
             return null;
         }
@@ -126,17 +159,60 @@ public with sharing class DynamicPromptTemplateHandler {
 }
 ```
 
-* **Note:** The response also includes a `safetyScoreRepresentation`, which evaluates response safety using a toxicity detection model.
-* If your prompt template returns **valid JSON**, you can parse the output easily in Apex or JavaScript (useful for LWC).
+### Highlights:
+
+* Handles one record per request (`Input:mycase`)
+* Use the Template API Name as defined in Prompt Builder
+* Returns the generated text from the first response
+* Suitable for calling inside Flows, Triggers, or Custom Buttons
 
 ---
 
-#### C. REST API Integration
+# C. REST API INTEGRATION
 
-* **Endpoint:**
-  `POST /services/data/v62.0/einstein/prompt-templates/Summarize_Classify_Cases1/generations`
+## Purpose
 
-* **Sample Request:**
+Use the REST API to invoke Prompt Templates from external applications, systems, or integrations such as Node.js, Python, or middleware platforms like MuleSoft.
+
+## Endpoint Format
+
+```
+POST /services/data/v62.0/einstein/prompt-templates/{TEMPLATE_API_NAME}/generations
+```
+
+## Example Request Body
+
+```json
+{
+  "isPreview": false,
+  "inputParams": {
+    "valueMap": {
+      "Input:mycase": {
+        "value": {
+          "id": "500gL000005ZwO1QAK"
+        }
+      }
+    }
+  },
+  "additionalConfig": {
+    "numGenerations": 1,
+    "temperature": 0,
+    "applicationName": "PromptBuilderPreview"
+  }
+}
+```
+
+### Field Breakdown:
+
+* `isPreview`: Set to `false` to trigger real LLM execution
+* `inputParams.valueMap`: Provide the input object ID (e.g., Case ID)
+* `additionalConfig`:
+
+  * `numGenerations`: Number of completions
+  * `temperature`: Lower means more deterministic
+  * `applicationName`: Logical label for identification
+
+## Sample cURL Command
 
 ```bash
 curl --location 'https://yourinstance.salesforce.com/services/data/v62.0/einstein/prompt-templates/Summarize_Classify_Cases1/generations' \
@@ -161,62 +237,13 @@ curl --location 'https://yourinstance.salesforce.com/services/data/v62.0/einstei
 }'
 ```
 
----
+### Use Cases
 
-## 3. Field Reference
-
-| Object      | Field               | Purpose                                 |
-| ----------- | ------------------- | --------------------------------------- |
-| Case        | Type                | AI classification output                |
-| Case        | Reason              | AI reason classification                |
-| Case        | Quick\_Summary\_\_c | AI-generated summary text               |
-| Case        | Subject             | Input to the prompt                     |
-| Case        | Description         | Input to the prompt                     |
-| CaseComment | (Related List)      | Contextual input for enhanced summaries |
+* Node.js/React front-end app invoking classification service
+* Middleware performing summarization as part of ETL flow
+* Third-party integration submitting records for AI processing
 
 ---
 
-## Prompt Template Entry Points
-
-Prompt templates can be executed through multiple entry points:
-
-| Prompt Template Type | Description                       | Inputs                              | Entry Points                                         |
-| -------------------- | --------------------------------- | ----------------------------------- | ---------------------------------------------------- |
-| Sales Email          | Draft personalized emails         | Contact or Lead (+ optional object) | Email Composer, Flow, Apex, REST API, Copilot action |
-| Field Generation     | Generate and store field value    | Any object                          | Record page, Flow, Apex, REST API, Copilot action    |
-| Flex                 | Flexible, multi-object generation | Up to 5 objects                     | Flow, Apex, REST API, Copilot action                 |
-| Record Summary       | Summary for Einstein Copilot      | Any object                          | Copilot action                                       |
-
-You can invoke prompt templates using built-in entry points like Email Composer or Dynamic Forms. You can also create **custom entry points** using Flow, Apex, or REST APIs to embed AI into your Salesforce business logic and external applications.
-
----
-
-## Implementation Notes
-
-* ✅ **Response Format:** Expects JSON with keys `caseType`, `reason`, and `summary`
-* ⚠️ **Error Handling:** Validate API success, null checks, and exceptions
-* 🔐 **Security:** Use scoped OAuth tokens for REST API authentication
-* 🧪 **Testing:** Test with varied real-life case inputs
-* 📊 **Monitoring:** Review classification accuracy and summary clarity
-
----
-
-## Example Output
-
-```json
-{
-  "caseType": "Mechanical",
-  "reason": "Installation",
-  "summary": "The case involves installation issues with a mechanical component. Customer reports difficulty assembling parts according to the manual. Case comments indicate technical drawings have been sent for clarification."
-}
-```
-
----
-
-## 🔗 Resources
-
-* [Salesforce Prompt Builder Documentation](https://help.salesforce.com/)
-* [Einstein 1 Studio Overview](https://www.salesforce.com/)
-* [ConnectApi.EinsteinLLM Apex Reference](https://developer.salesforce.com/docs/)
-
-> 💡 Be sure to also read our previous blog post on prompt templates to explore grounding techniques and best practices.
+> ✅ **Tip:** Always test your Apex or REST request in Postman or Developer Console before moving to production.
+> ✅ **Tip:** Use the same prompt API name and input mappings as configured in your Prompt Builder template.
