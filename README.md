@@ -1,6 +1,7 @@
 # Leveraging Prompt Templates Across Salesforce Ecosystem
 
 ## Overview
+
 Salesforce’s **Prompt Builder** empowers organizations to integrate generative AI seamlessly into business processes by dynamically generating context-aware responses. Whether automating case summaries, drafting personalized emails, or enriching field data, Prompt Templates can be invoked through multiple entry points—**Flow, Apex, or REST API**—enabling AI-driven automation across declarative and programmatic solutions.
 
 This guide explores how to integrate Prompt Templates into Salesforce workflows, backend logic, and external systems, with a focus on a **Case Classification & Summarization** use case.
@@ -15,6 +16,7 @@ Prompt Builder, part of **Einstein 1 Studio**, enables integration of generative
 
 ![Prompt Life Cycle](https://github.com/D5MetaLabs/AgentForce-Prompt-API/blob/d5f56c40926c7cd860a1b335ff3e5405ead1945e/Prompt%20life%20cycle.png)
 
+
 ## Entry Point Matrix
 
 | Template Type        | Description                                                | Inputs                                      | Available Entry Points                               |
@@ -28,10 +30,10 @@ Prompt Builder, part of **Einstein 1 Studio**, enables integration of generative
 
 ## Entry Points Reference
 
-| Out-of-the-Box Entry Points​           | Custom Entry Points​                      |
-| --------------------------- | ------------------------------------------ |
-| Email Composer (OOTB)       | Flow (Declarative)                |
-| Dynamic Record Pages (OOTB) | Apex (Backend logic)   |
+| Out-of-the-Box Entry Points | Custom Entry Points              |
+| --------------------------- | -------------------------------- |
+| Email Composer (OOTB)       | Flow (Declarative)               |
+| Dynamic Record Pages (OOTB) | Apex (Backend logic)             |
 | Copilot Actions (OOTB)      | REST API (External Applications) |
 
 ---
@@ -77,7 +79,7 @@ Priority: {!$Input:myCase.Priority}
 Subject: {!$Input:myCase.Subject}
 Description: {!$Input:myCase.Description}
 Case Comments: {!$RelatedList:mycase.CaseComments.Records}
-Now categorize and summarize the case. Output your categorization and summary as valid JSON with the keys "caseType", "reason", and "summary". Always include each key.Ensure that you return valid JSON.
+Now categorize and summarize the case. Output your categorization and summary as valid JSON with the keys "caseType", "reason", and "summary". Always include each key.Ensure that you return valid JSON.
 
 Below is an example output:
 {
@@ -97,6 +99,7 @@ Every saved and activated prompt template that you create is automatically expos
 
 All templates with a specific input should have that input passed in as a related entity when invoked from a flow.
 In this example, since this is a field generation prompt template that’s associated with the Contact object, you need to pass a contact as a related entity.
+
 * **Type:** Record-Triggered Flow
 * **Trigger:** On Case Create/Update
 * **Logic:**
@@ -104,6 +107,11 @@ In this example, since this is a field generation prompt template that’s assoc
   * Checks if `Reason`, `Type`, or `Quick_Summary__c` is blank
   * Invokes the prompt template using Flow action
   * Parses and updates Case using Apex class `CaseSummarizationTemplateParser`
+
+
+## Demo :
+ 
+ ![ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/859c8e81-fc22-4580-a40f-dcc4e9792728)
 
 
 # B. APEX INTEGRATION
@@ -174,6 +182,10 @@ public with sharing class DynamicPromptTemplateHandler {
 * Use the Template API Name as defined in Prompt Builder
 * Returns the generated text from the first response
 * Suitable for calling inside Flows, Triggers, or Custom Buttons
+
+## Demo : 
+
+![ScreenRecording2025-05-19at10 09 04PM-ezgif com-speed (1)](https://github.com/user-attachments/assets/4ed8778c-4667-4eaf-999d-c04b865b074c)
 
 ---
 
@@ -255,4 +267,14 @@ curl --location 'https://yourinstance.salesforce.com/services/data/v62.0/einstei
 ---
 
 > ✅ **Tip:** Always test your Apex or REST request in Postman or Developer Console before moving to production.
+
 > ✅ **Tip:** Use the same prompt API name and input mappings as configured in your Prompt Builder template.
+
+---
+
+## Resources
+
+* [Apex ConnectApi Overview](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/connectAPI_overview.htm)
+* [Prompt Template Connect REST Resource](https://developer.salesforce.com/docs/atlas.en-us.chatterapi.meta/chatterapi/connect_resources_prompt_template.htm)
+* [Prompt Builder Documentation](https://help.salesforce.com/s/articleView?id=ai.prompt_builder_about.htm&type=5)
+
